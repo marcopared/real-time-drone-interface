@@ -1,0 +1,145 @@
+Metadata-Version: 2.1
+Name: rktellolib
+Version: 1.0.4
+Summary: A simple library to interface with the DJI Tello drone
+Author-email: Ramsin Khoshabeh <ramsin@ucsd.edu>
+License: Copyright 2021 Ramsin Khoshabeh, PhD
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+        
+        
+Project-URL: Homepage, https://github.com/ramujin/rktellolib
+Project-URL: Bug Tracker, https://github.com/ramujin/rktellolib/issues
+Keywords: dji,tello,ryze,drone,sdk,official sdk
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.5
+Description-Content-Type: text/markdown
+License-File: License.txt
+
+# RKTelloLib
+
+### In light of the many poorly-designed libraries to interact with the DJI (Ryze) Tello drone that either do way more than they should or don't do enough, I have taken the initiative to create this small library. It's a simple interface built upon the official [Tello SDK](https://dl-cdn.ryzerobotics.com/downloads/tello/20180910/Tello%20SDK%20Documentation%20EN_1.3.pdf) that allows you to control and interact with the drone with minimal effort.
+
+
+## Installation
+
+### Install using PIP
+
+```bash
+$ pip install rktellolib
+```
+
+### Install from Source
+
+```bash
+$ git clone https://github.com/ramujin/rktellolib.git
+$ cd rktellolib
+$ pip install -e .
+```
+
+## Example Usage to Fly in a Square Pattern
+
+```python
+from rktellolib import Tello
+
+drone = Tello(debug=True, has_video=False)
+
+drone.connect()
+drone.takeoff()
+
+drone.forward(100)
+drone.cw(90)
+drone.forward(100)
+drone.cw(90)
+drone.forward(100)
+drone.cw(90)
+drone.forward(100)
+drone.cw(90)
+
+drone.land()
+drone.disconnect()
+```
+
+## Example Usage to Stream Video
+
+```python
+from rktellolib import Tello
+import cv2
+
+drone = Tello(debug=True, has_video=True)
+
+drone.connect()
+
+while True:
+  frame = drone.get_frame()
+  if frame is None:
+    break
+
+  cv2.imshow('rktellolib', frame)
+
+  if cv2.waitKey(1) == 27: # ESC key
+    break
+
+drone.disconnect()
+```
+
+## Available Commands
+
+```python
+# Operational Commands
+connect()
+disconnect()
+takeoff()
+land()
+
+# Discrete Action Commands
+up(distance: int)
+down(distance: int)
+left(distance: int)
+right(distance: int)
+forward(distance: int)
+back(distance: int)
+cw(degree: int)
+ccw(degree: int)
+
+# RC Control Command
+rc(v_lr: int, v_fb: int, v_ud: int, v_yaw: int)
+
+# Camera Command
+get_frame()
+
+# Retrieve All Drone State Information
+get_states()
+
+# Retrieve a Specific State
+get_state(field: str)
+
+# Retrieve System & Environment States
+get_battery()
+get_flight_time()
+get_temp()
+get_barometer()
+
+# Retrieve Positional States
+get_height()
+get_distance_tof()
+get_ax()
+get_ay()
+get_az()
+get_vx()
+get_vy()
+get_vz()
+
+# Retrieve Rotational States
+get_roll()
+get_pitch()
+get_yaw()
+```

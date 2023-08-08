@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Drone Position Visualization</title>
+    <script src="/static/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Real-time Drone Position Visualization</h1>
+    <div id="drone-chart"></div>
+    <script>
+        let coordinates = [];
+
+        let trace = {
+            x: [],
+            y: [],
+            z: [],
+            mode: 'lines',
+            type: 'scatter3d',
+            name: 'Drone Position'
+        };
+
+        let layout = {
+            title: 'Drone Position Over Time',
+            scene: {
+                xaxis: { title: 'X' },
+                yaxis: { title: 'Y' },
+                zaxis: { title: 'Z' },
+            }
+        };
+
+        let config = {responsive: true};
+
+        // Initial chart rendering
+        Plotly.newPlot('drone-chart', [trace], layout, config);
+
+        let socket = new WebSocket("ws://localhost:8000/ws/positions");
+
+        socket.onmessage = function(event) {
+            let data = JSON.parse(event.data);
+            coordinates = data.coordinates;
+
+            trace.x = coordinates.map(coord => coord[0]);
+            trace.y = coordinates.map(coord => coord[1]);
+            trace.z = coordinates.map(coord => coord[2]);
+
+            Plotly.react('drone-chart', [trace], layout, config);
+
+            console.log(coordinates);
+        };
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Makes the body fill the screen vertically */
+        }
+        h1 {
+            margin-bottom: 20px; /* Adds some space between the title and the buttons */
+        }
+        .button {
+            height: 128px;
+            width: 128px;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 50% 50%;
+            border-style: groove;
+            margin: 10px;  
+        }
+        #forward { background-image: url('/static/icons/forward_button.png'); }
+        #backward { background-image: url('/static/icons/backward_button.png'); }
+        #left { background-image: url('/static/icons/left_button.png'); }
+        #right { background-image: url('/static/icons/right_button.png'); }
+        #takeoff_land { background-image: url('/static/icons/takeoff_button.png'); }
+        #ccw { background-image: url('/static/icons/ccw_button.png'); }
+        #cw { background-image: url('/static/icons/cw_button.png'); }
+        #ascend { background-image: url('/static/icons/ascend_button.png'); }
+        #descend { background-image: url('/static/icons/descend_button.png'); }
+
+        #controller {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;  
+        }
+        .button-row {
+            display: flex;
+            justify-content: center;
+        }
+
+    </style>
+    <script>
+        let socket = new WebSocket("ws://localhost:8000/ws/controls");
+        let airborne = false;
+
+        function sendCommand(command) {
+            socket.send(JSON.stringify({ 'command': command }));
+        }
+
+        function toggleAirborne() {
+            airborne = !airborne;
+            let takeoffLandButton = document.getElementById('takeoff_land');
+            if (airborne) {
+                takeoffLandButton.style.backgroundImage = 'url("/static/icons/land_button.png")';
+                sendCommand('takeoff');
+            } else {
+                takeoffLandButton.style.backgroundImage = 'url("/static/icons/takeoff_button.png")';
+                sendCommand('land');
+            }
+        }
+
+
+        document.onkeydown = function(e) {
+            switch (e.key) {
+                case 'ArrowUp': sendCommand('forward'); break;
+                case 'ArrowDown': sendCommand('back'); break;
+                case 'ArrowLeft': sendCommand('left'); break;
+                case 'ArrowRight': sendCommand('right'); break;
+                case ' ': toggleAirborne(); break;
+            }
+
+            setTimeout(1000);
+        };
+    </script>
+</head>
+<body>
+    <h1>Drone Control</h1>
+    <div id="controller">
+        <div class="button-row">
+            <div id="ascend" class="button" onclick="sendCommand('up')"></div>
+            <div id="forward" class="button" onclick="sendCommand('forward')"></div>
+            <div id="descend" class="button" onclick="sendCommand('down')"></div>
+        </div>
+        <div class="button-row">
+            <div id="left" class="button" onclick="sendCommand('left')"></div>
+            <div id="takeoff_land" class="button" onclick="toggleAirborne()"></div>
+            <div id="right" class="button" onclick="sendCommand('right')"></div>
+        </div>
+        <div class="button-row">
+            <div id="ccw" class="button" onclick="sendCommand('ccw')"></div>
+            <div id="backward" class="button" onclick="sendCommand('back')"></div>
+            <div id="cw" class="button" onclick="sendCommand('cw')"></div>
+        </div>
+    </div>
+</body>
+</html>
